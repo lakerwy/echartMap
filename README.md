@@ -45,4 +45,7 @@
 
 --npm run dev
 
+npm 版本 8.1.2
+node 版本 16.13.2
+
 

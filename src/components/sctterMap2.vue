@@ -1,16 +1,16 @@
 <template>
   <div class="echarts" v-if="reloadVal">
-    <div style="width:100%;height:100%" ref="sctterMap"></div>
+    <div style="width:100%;height:80%;margin-top: 40px" ref="sctterMap"></div>
 <!--    <div class="statisMap" id="statisMap"></div>-->
     <div class="mapChoose">
       <span v-for="(item,index) in parentInfo" :key="item.code" class="titleBox">
-        <span class="title" @click="chooseArea(item,index)">{{ item.cityName == '全国' ? '湖北' : item.cityName }}</span>
+        <span class="title" @click="chooseArea(item,index)">{{ item.cityName == '全国' ? '中国' : item.cityName }}</span>
         <span class="icon" v-show="index+1!=parentInfo.length">></span>
       </span>
     </div>
     <div class="box" v-show="showBox" ref="showBox">
-      <div class="title">{{ city }}{{ title }}数量统计
-        <div class="close-container"><img src="" @click="close"></div>
+      <div class="title">{{ city }}{{ title }}
+        <div class="close-container"><img src="img/one-picture-close.png" @click="close"></div>
       </div>
       <div id="histogChart" class="histogChart">
       </div>
@@ -21,7 +21,7 @@
 <script>
 import * as echarts from 'echarts';
 import resize from "./mixins/resize";
-import {initEcharts} from "./js/utils";
+import {initEcharts, throttle} from "./js/utils";
 import echartOption from "./js/echartOption";
 // import {getAreaMachine, getGroupData, getStatGroupData} from "../../api/agridata";
 import {lineData, scatterData, scatterData2} from "./js/utils"
@@ -32,7 +32,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: '农机'
+      default: '统计'
     }
   },
   data() {
@@ -55,8 +55,10 @@ export default {
         features: []
       },
       parentInfo: [{
-        cityName: "湖北",
-        code: 420000
+        // cityName: "湖北",
+        // code: 420000
+        cityName: "全国",
+        code: 100000
       }],
       adress: {
         city: "",
@@ -68,8 +70,8 @@ export default {
     };
   },
   mounted() {
-    this.getGeoJson(420000);
-    // initEcharts('statisMap', echartOption.statisMapOption);
+    this.getGeoJson(100000);
+    initEcharts('histogChart', echartOption.workOption);
   },
   beforeDestroy() {
     document.removeEventListener('click', this.domClick)
@@ -110,7 +112,7 @@ export default {
         return {
           name: item.properties.name,
           value: Math.random() * 1000,
-          cityCode: item.properties.adcode
+          cityCode: item.properties.adcode,
         };
       });
       mapData = mapData.sort(function (a, b) {
@@ -119,16 +121,20 @@ export default {
       this.initEcharts(mapData);
     },
     initEcharts(mapData) {
+      let length = this.parentInfo.length;
       var min = mapData[mapData.length - 1].value;
       var max = mapData[0].value;
       this.myChart = echarts.init(this.$refs.sctterMap);
       echarts.registerMap("Map", this.geoJson); //注册
       console.log(this.geoJson);
       let mapJson = echarts.getMap("Map")
-      // let geoCoordMap = {};
-      // mapJson.features.forEach(item => {
-      //   geoCoordMap[item.properties.name] = item.properties.centroid;
-      // })
+      console.log(mapJson);
+      console.log(mapJson.geoJSON);
+      let geoCoordMap = {};
+      mapJson.geoJSON.features.forEach(item => {
+        geoCoordMap[item.properties.name] = item.properties.centroid || item.properties.center;
+      })
+      console.log(geoCoordMap);
       this.myChart.setOption({
           geo: {
             map: 'Map',
@@ -239,106 +245,96 @@ export default {
                 }
               },
             },
-            //柱子部分
-            // {
-            //   type: 'lines',
-            //   zlevel: 4,
-            //   effect: {
-            //     show: false,
-            //     symbolSize: 5 // 图标大小
-            //   },
-            //   lineStyle: {
-            //     width: 20, // 尾迹线条宽度
-            //     // color: 'rgb(22,255,255, .6)',
-            //     color: {
-            //       type: 'linear',
-            //       x: 0,
-            //       y: 0,
-            //       x2: 1,
-            //       y2: 0,
-            //       colorStops: [
-            //         {
-            //           offset: 0,
-            //           color: 'rgba(17,166,106,.9)' // 最左边
-            //         }, {
-            //           offset: 0.5,
-            //           color: 'rgba(17,166,106,.9)' // 左边的右边 颜色
-            //         }, {
-            //           offset: 0.5,
-            //           color: 'rgba(12,134,135,.9)' // 右边的左边 颜色
-            //         }, {
-            //           offset: 1,
-            //           color: 'rgba(12,134,135,.9)'
-            //         }],
-            //       global: false, // 缺省为 false
-            //     },
-            //     opacity: 1, // 尾迹线条透明度
-            //     curveness: 0 // 尾迹线条曲直度
-            //   },
-            //   label: {
-            //     show: 0,
-            //     position: 'end',
-            //     formatter: '245'
-            //   },
-            //   silent: true,
-            //   data: lineData(mapData,geoCoordMap)
-            // },
-            // // 柱状体的顶部
-            // {
-            //   type: 'scatter',
-            //   symbol: 'diamond',
-            //   symbolOffset: [0, 0],
-            //   symbolSize: [20, 10],
-            //   itemStyle: {
-            //     normal: {
-            //       color: 'rgba(17,166,106,1)',
-            //     }
-            //   },
-            //   coordinateSystem: 'geo',
-            //   geoIndex: 0,
-            //   zlevel: 5,
-            //   silent: true,
-            //   data: scatterData(mapData,geoCoordMap)
-            // },
-            // // 柱状体的底部
-            // {
-            //
-            //   symbol: 'diamond',
-            //   symbolOffset: [0, '0'],
-            //   symbolSize: [20, 10],
-            //   type: 'scatter',
-            //   coordinateSystem: 'geo',
-            //   geoIndex: 0,
-            //   zlevel: 3,
-            //   itemStyle: {
-            //     // color: '#F7AF21',
-            //     color: {
-            //       type: 'linear',
-            //       x: 0,
-            //       y: 0,
-            //       x2: 1,
-            //       y2: 0,
-            //       colorStops: [
-            //         {
-            //           offset: 0,
-            //           color: 'rgba(17,166,106,1)' // 最左边
-            //         }, {
-            //           offset: 0.5,
-            //           color: 'rgba(17,166,106,1)' // 左边的右边 颜色
-            //         }, {
-            //           offset: 0.5,
-            //           color: 'rgba(12,134,135,1)' // 右边的左边 颜色
-            //         }, {
-            //           offset: 1,
-            //           color: 'rgba(12,134,135,1)'
-            //         }],
-            //       global: false, // 缺省为 false
-            //     },
-            //     opacity: 1
-            //   },
-            //   silent: true,
-            //   data: scatterData2(mapData,geoCoordMap)
-            // },
+            // 柱子部分
+            {
+              type: 'lines',
+              zlevel: 4,
+              effect: {
+                show: false,
+                symbolSize: 5 // 图标大小
+              },
+              lineStyle: {
+                width: 20, // 尾迹线条宽度
+                // color: 'rgb(22,255,255, .6)',
+                "color": {
+                  "x": 0,
+                  "y": 0,
+                  "x2": 0,
+                  "y2": 1,
+                  "type": "linear",
+                  "global": false,
+                  "colorStops": [{//第一节下面
+                    "offset": 0,
+                    "color": "rgba(0,255,245,0.5)"
+                  }, {
+                    "offset": 1,
+                    "color": "#43bafe"
+                  }]
+                },
+                opacity: 1, // 尾迹线条透明度
+                curveness: 0 // 尾迹线条曲直度
+              },
+              label: {
+                show: 0,
+                position: 'end',
+                formatter: '245'
+              },
+              silent: true,
+              data: lineData(mapData,geoCoordMap,length)
+            },
+            // 柱状体的顶部
+            {
+              type: 'scatter',
+              symbol: 'circle',
+              symbolOffset: [0, 0],
+              symbolSize: [20, 10],
+              "itemStyle": {
+                "normal": {
+                  color: new echarts.graphic.LinearGradient(0,0,0,1,
+                      [{
+                        offset: 0,
+                        color: "rgba(89,211,255,1)"
+                      },
+                        {
+                          offset: 1,
+                          color: "rgba(23,237,194,1)"
+                        }
+                      ],
+                      false
+                  ),
+                }
+              },
+              coordinateSystem: 'geo',
+              geoIndex: 0,
+              zlevel: 5,
+              silent: true,
+              data: scatterData(mapData,geoCoordMap,length)
+            },
+            // 柱状体的底部
+            {
+              symbol: 'circle',
+              symbolOffset: [0, '0'],
+              symbolSize: [20, 10],
+              type: 'scatter',
+              coordinateSystem: 'geo',
+              geoIndex: 0,
+              zlevel: 3,
+              itemStyle: {
+                "normal": {
+                  color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: "rgba(89,211,255,1)"
+                  },
+                    {
+                      offset: 1,
+                      color: "rgba(23,237,194,1)"
+                    }
+                  ])
+                }
+              },
+              silent: true,
+              data: scatterData2(mapData,geoCoordMap)
+            },
           ]
         },
         true
@@ -360,23 +356,16 @@ export default {
         that.getGeoJson(data.cityCode);
       });
       this.myChart.off('mousemove');
-      this.myChart.on("mousemove", function (params) {
+      this.myChart.on("mousemove", throttle(function (params) {
         params.event.event ? params.event.event.stopPropagation() : event.cancelBubble = true
         if (params.name) {
           that.showBox = true
-          if (that.city != params.name) {
-            if (that.title == '农机') {
-              that.getMachineDataGroup(params.name);
-            } else {
-              that.getWorkGroup(params.name);
-            }
-          }
           that.city = params.name;
           if (that.showBox) that.fixingPositon()
         } else {
           that.showBox = false
         }
-      }, 100);
+      }, 200));
       this.myChart.getZr().on("mousemove", params=> {
         let pointInPixel= [params.offsetX, params.offsetY];
         if (!this.myChart.containPixel({geoIndex: 0},pointInPixel)) {
@@ -408,32 +397,6 @@ export default {
       this.getGeoJson(this.parentInfo[this.parentInfo.length - 1].code);
 
     },
-
-    //农机数量统计
-    async getMachineDataGroup(name) {
-      let city = '', county = '';
-      if (this.parentInfo.length > 1) {
-        city = this.parentInfo[1].cityName;
-        county = name;
-      } else {
-        city = name;
-      }
-      let res = await getGroupData({
-        city: city,
-        county: county,
-        province: "湖北省",
-      })
-      if (res.success) {
-        let name = [], value = [];
-        res.data.forEach(item => {
-          name.push(item.key);
-          value.push(item.data);
-        })
-        this.$set(echartOption.machToolOption.yAxis[0], 'data', name);
-        this.$set(echartOption.machToolOption.series[0], 'data', value);
-        initEcharts('histogChart', echartOption.machToolOption);
-      }
-    },
     //作业数量统计
     async getWorkGroup(name) {
       let city = '', county = '';
@@ -458,6 +421,8 @@ export default {
 .echarts {
   width: 100%;
   height: 100%;
+  background: url("../assets/bg1.jpg") no-repeat;
+  background-size: 100% 100%;
   position: absolute;
 
   .statisMap {

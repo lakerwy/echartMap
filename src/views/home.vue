@@ -2,9 +2,9 @@
 <template>
   <div id="Home">
     <div class="select">
-      <div class="select_item" v-for="item in mapList" :key="item.index" @click.stop="changeList(item)">
-        <p class="name" :class="item.type==currenIndex?'active':''">{{item.name}}</p>
-      </div>
+<!--      <div class="select_item" v-for="item in mapList" :key="item.index" @click.stop="changeList(item)">-->
+<!--        <p class="name" :class="item.type==currenIndex?'active':''">{{item.name}}</p>-->
+<!--      </div>-->
     </div>
     <component :is="currenIndex" v-cloak />
   </div>
@@ -31,21 +31,21 @@
             name: '分布图',
             index: 1,
           },
-          {
-            type: 'heatMap',
-            name: '热力图',
-            index: 2,
-          },
-          {
-            type: 'dotMap',
-            name: '散点图',
-            index: 3,
-          },
-          {
-            type: 'allMap',
-            name: '综合地图',
-            index: 4,
-          },
+          // {
+          //   type: 'heatMap',
+          //   name: '热力图',
+          //   index: 2,
+          // },
+          // {
+          //   type: 'dotMap',
+          //   name: '散点图',
+          //   index: 3,
+          // },
+          // {
+          //   type: 'allMap',
+          //   name: '综合地图',
+          //   index: 4,
+          // },
         ],
       }
     },

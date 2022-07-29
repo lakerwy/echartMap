@@ -517,9 +517,8 @@ export default {
       show: false
     },
     grid: {
-      left: '40%',
+      left: '30%',
       top: '6%',
-      width: '50%',
     },
     xAxis: [{
       splitLine: {
@@ -541,17 +540,16 @@ export default {
         show: false
       },
       inverse: true,
-      data: ['拖拉机机具', '松深机', '旋耕机', '灭茬机', '播种机', '耕地犁', '翻转犁', '打捆机'],
+      data: ['拖拉机', '松深机', '旋耕机', '灭茬机', '播种机', '耕地犁', '翻转犁', '打捆机'],
       axisLabel: {
         color: '#A7D6F4',
         fontSize: 14,
         margin: 20,
       },
-
     }],
     series: [
       {
-        name: '农机数量',
+        name: '数量',
         type: 'bar',
         barWidth: 10, // 柱子宽度
         showBackground: true,

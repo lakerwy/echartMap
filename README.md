@@ -1,9 +1,7 @@
 # EchartsMap
 
 > 使用echarts+Amap 获取行政区边界的geoJson
-前提准备：首先你要去高德api上申请密钥，免费的，一天可以发出5000次请求，次数太多了你要去花钱申请企业版，直通车：[https://developer.amap.com/](https://developer.amap.com/)
-
-> 地址预览：[https://gist006.gitee.io/echartsmap/#/](https://gist006.gitee.io/echartsmap/#/)
+前提准备：首先你要去高德api上申请密钥，免费的，一天可以发出5000次请求，次数太多了你要去花钱申请企业版，直通车：[https://developer.amap.com/](https://developer.amap.co
 
 渲染步骤主要分为：
 
